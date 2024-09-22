@@ -1,0 +1,23 @@
+.component {
+    min-height: 1200px;
+    min-width: 80%;
+    margin-left: auto;
+    margin-top: 5%;
+    margin-bottom: auto;
+    margin-right: 5px;
+  }
+  
+  @media (min-width: 600px) {
+    .component {
+      min-height: 1300px;
+      min-width: 80%;
+    }
+  }
+  
+  @media (min-width: 900px) {
+    .component {
+      min-height: 1400px;
+      min-width: 80%;
+    }
+  }
+  

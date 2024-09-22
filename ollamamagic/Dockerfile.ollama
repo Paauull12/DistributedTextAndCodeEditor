@@ -1,0 +1,7 @@
+FROM ollama/ollama:latest
+
+COPY preload_model.sh /preload_model.sh
+
+RUN chmod +x /preload_model.sh
+
+ENTRYPOINT ["/bin/sh", "-c", "ollama serve & sleep 10 && /preload_model.sh && wait"]

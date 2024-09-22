@@ -1,0 +1,56 @@
+{
+  "name": "textedit",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@ckeditor/ckeditor5-build-classic": "^43.1.0",
+    "@ckeditor/ckeditor5-react": "^9.1.0",
+    "@codemirror/lang-javascript": "^6.2.2",
+    "@monaco-editor/react": "^4.6.0",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "ace-builds": "^1.36.2",
+    "axios": "^1.7.7",
+    "bootstrap": "^5.3.3",
+    "codemirror": "^6.0.1",
+    "highlight.js": "^11.10.0",
+    "ot": "^0.0.15",
+    "quill": "^2.0.2",
+    "quill-better-table": "^1.2.10",
+    "react": "^18.3.1",
+    "react-ace": "^12.0.0",
+    "react-dom": "^18.3.1",
+    "react-quill": "^2.0.0",
+    "react-router-dom": "^6.26.2",
+    "react-scripts": "5.0.1",
+    "web-vitals": "^2.1.4",
+    "y-quill": "^1.0.0",
+    "y-websocket": "^2.0.4",
+    "yjs": "^13.6.19"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
