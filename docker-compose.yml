@@ -1,0 +1,165 @@
+services:
+  frontreact:
+      build: 
+        context: ./texteditor
+        dockerfile: Dockerfile
+      container_name: react-container
+      ports:
+        - '3000:3000'
+      stdin_open: true
+      networks:
+        - my_network
+
+  websocket:
+    image: node:18-alpine
+    working_dir: /app
+    command: sh -c "npm i y-websocket && npx y-websocket"
+    ports:
+      - "1234:1234"
+    environment:
+      - HOST=0.0.0.0
+    networks:
+      - my_network
+
+  backend:
+    build: ./tutorialchannels
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      #- rabbitmq
+      - flask_api
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - DATABASE_URL=postgresql://user:password_sigur@db:5432/users
+    networks:
+      - my_network
+
+  go-server:
+    build: ./goserver
+    ports:
+      - "8080:8080"
+    environment:
+      - GO_ENV=development
+    networks:
+      - my_network
+
+  # rabbitmq:
+  #   image: rabbitmq:3-management
+  #   container_name: rabbitmq
+  #   ports:
+  #     - "5672:5672"  # AMQP protocol port
+  #     - "15672:15672"  # Management UI port
+  #   environment:
+  #     - RABBITMQ_DEFAULT_USER=channelsuser
+  #     - RABBITMQ_DEFAULT_PASS=channelspassword
+  #     - RABBITMQ_DEFAULT_VHOST=channelsvhost
+  #   volumes:
+  #     - rabbitmq_data:/var/lib/rabbitmq
+  #   healthcheck:
+  #     test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 5
+  #   restart: unless-stopped
+
+    
+  auth_service:
+    build: ./flaskwebserver
+    ports:
+      - "4050:4050"
+    env_file:
+      - ./flaskwebserver/.env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+    networks:
+      - my_network
+
+  db:
+    image: postgres:13
+    env_file:
+      - ./flaskwebserver/.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - my_network
+    healthcheck:
+      test: "/bin/true"  # This command always succeeds
+      interval: 5s
+      timeout: 10s
+      retries: 2
+      start_period: 2s
+
+
+
+  flask_api:
+    build: ./ollamamagic
+    ports:
+      - "4040:4040"
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    depends_on:
+      - redis
+      - ollama
+    networks:
+      - my_network
+
+  celery-worker:
+    build: ./ollamamagic
+    command: celery -A tasks worker --loglevel=info --concurrency=3
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    depends_on:
+      - redis
+      - ollama
+    networks:
+      - my_network
+
+  redis_channels:
+    image: "redis:6-alpine"  # Redis for Django Channels
+    container_name: redis_channels
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_channels_data:/data
+    networks:
+      - my_network
+    restart: unless-stopped
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+    networks:
+      - my_network
+
+  ollama:
+    build:
+      context: ./ollamamagic
+      dockerfile: Dockerfile.ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - my_network
+
+
+
+volumes:
+  rabbitmq_data:
+  postgres_data:
+  ollama_data:
+  redis_channels_data:
+
+networks:
+  my_network:
+    driver: bridge
